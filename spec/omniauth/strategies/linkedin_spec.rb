@@ -85,9 +85,10 @@ describe OmniAuth::Strategies::LinkedIn do
     let(:expires_in) { 3600 }
     let(:expires_at) { 946688400 }
     let(:token) { 'token' }
+    let(:refresh_token) { 'refresh_token' }
     let(:access_token) do
       instance_double OAuth2::AccessToken, :expires_in => expires_in,
-        :expires_at => expires_at, :token => token
+        :expires_at => expires_at, :token => token, :refresh_token => refresh_token
     end
 
     before :each do
@@ -108,5 +109,24 @@ describe OmniAuth::Strategies::LinkedIn do
         expect(subject.authorize_params['scope']).to eq('r_liteprofile r_emailaddress')
       end
     end
+  end
+
+  describe '#localized_field' do
+    let(:raw_info) do 
+      {
+        'foo' => { 
+          'preferredLocale' => { 
+            'language' => 'bar', 
+            'country' => 'BAZ' 
+          }
+        }
+      }
+    end
+
+    before :each do
+      allow(subject).to receive(:raw_info).and_return raw_info
+    end
+
+    specify { expect(subject.send(:field_locale,'foo')).to eq 'bar_BAZ' }
   end
 end

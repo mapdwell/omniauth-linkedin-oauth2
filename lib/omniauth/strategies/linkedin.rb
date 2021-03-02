@@ -42,7 +42,8 @@ module OmniAuth
       def access_token
         ::OAuth2::AccessToken.new(client, oauth2_access_token.token, {
           :expires_in => oauth2_access_token.expires_in,
-          :expires_at => oauth2_access_token.expires_at
+          :expires_at => oauth2_access_token.expires_at,
+          :refresh_token => oauth2_access_token.refresh_token
         })
       end
 
@@ -92,18 +93,12 @@ module OmniAuth
       end
 
       def localized_field field_name
-        return unless localized_field_available? field_name
-
-        raw_info[field_name]['localized'][field_locale(field_name)]
+        raw_info.dig(*[field_name, 'localized', field_locale(field_name)])
       end
 
       def field_locale field_name
         "#{ raw_info[field_name]['preferredLocale']['language'] }_" \
           "#{ raw_info[field_name]['preferredLocale']['country'] }"
-      end
-
-      def localized_field_available? field_name
-        raw_info[field_name] && raw_info[field_name]['localized']
       end
 
       def picture_url
